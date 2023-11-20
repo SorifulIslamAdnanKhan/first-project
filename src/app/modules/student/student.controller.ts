@@ -3,8 +3,8 @@ import { StudentServices } from './student.service';
 
 const createStudent = async (req: Request, res: Response) => {
   try {
-    const student = req.body;
-    const result = await StudentServices.createStudentIntoDB(student);
+    const { student: studentData } = req.body;
+    const result = await StudentServices.createStudentIntoDB(studentData);
 
     res.status(200).json({
       success: true,
@@ -16,6 +16,35 @@ const createStudent = async (req: Request, res: Response) => {
   }
 };
 
+const getAllStudents = async (req: Request, res: Response) => {
+  try {
+    const result = await StudentServices.getAllStudentsFrmDB();
+    res.status(200).json({
+      success: true,
+      message: 'Students are retrieved sucessfully',
+      data: result,
+    });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const getSingleStudent = async (req: Request, res: Response) => {
+  try {
+    const { studentId } = req.params;
+    const result = await StudentServices.getSingleStudentsFrmDB(studentId);
+    res.status(200).json({
+      success: true,
+      message: 'Students is retrieved sucessfully',
+      data: result,
+    });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 export const StudentController = {
   createStudent,
+  getAllStudents,
+  getSingleStudent,
 };

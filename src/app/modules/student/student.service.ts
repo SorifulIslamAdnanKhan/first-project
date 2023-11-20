@@ -6,6 +6,18 @@ const createStudentIntoDB = async (student: Student) => {
   return result;
 };
 
+const getAllStudentsFrmDB = async () => {
+  const result = await StudentModel.find();
+  return result;
+};
+
+const getSingleStudentsFrmDB = async (id: string) => {
+  const result = await StudentModel.findOne({ id });
+  return result;
+};
+
 export const StudentServices = {
   createStudentIntoDB,
+  getAllStudentsFrmDB,
+  getSingleStudentsFrmDB,
 };
