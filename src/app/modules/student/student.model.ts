@@ -1,15 +1,11 @@
 import { Schema, model } from 'mongoose';
-//import validator from 'validator';
 import {
   TGurdian,
   TLocalGurdian,
   TStudent,
-  // StudentMethods,
   StudentModel,
   TUserName,
-} from './student/student.interface';
-import bcrypt from 'bcrypt';
-import config from '../config';
+} from './student.interface';
 
 const userNameSchema = new Schema<TUserName>({
   firstName: {
@@ -17,13 +13,6 @@ const userNameSchema = new Schema<TUserName>({
     required: [true, 'First name is required'],
     trim: true,
     maxlength: [20, 'First name can not be more than 20 characters'],
-    // validate: {
-    //   validator: function (value: string) {
-    //     const firstNameStr = value.charAt(0).toUpperCase() + value.slice(1);
-    //     return firstNameStr === value;
-    //   },
-    //   message: '{VALUE} is not in capitalize format',
-    // },
   },
   middleName: {
     type: String,
@@ -33,10 +22,6 @@ const userNameSchema = new Schema<TUserName>({
     type: String,
     required: [true, 'First name is required'],
     trim: true,
-    // validate: {
-    //   validator: (value: string) => validator.isAlpha(value),
-    //   message: '{VALUE} is not valid',
-    // },
   },
 });
 
@@ -100,10 +85,11 @@ const studentSchema = new Schema<TStudent, StudentModel>(
       required: [true, 'Student ID is required'],
       unique: true,
     },
-    password: {
-      type: String,
-      required: [true, 'Student password is required'],
-      maxlength: [20, 'Password can not be more than 20 characters'],
+    user: {
+      type: Schema.Types.ObjectId,
+      required: [true, 'User ID is required'],
+      unique: true,
+      ref: 'User',
     },
     name: {
       type: userNameSchema,
@@ -126,10 +112,6 @@ const studentSchema = new Schema<TStudent, StudentModel>(
       trim: true,
       required: [true, 'Email is required'],
       unique: true,
-      // validate: {
-      //   validator: (value: string) => validator.isEmail(value),
-      //   message: '{VALUE} is not a valid email',
-      // },
     },
     contactNo: {
       type: String,
@@ -164,11 +146,6 @@ const studentSchema = new Schema<TStudent, StudentModel>(
     profileImage: {
       type: String,
     },
-    isActive: {
-      type: String,
-      enum: ['active', 'blocked'],
-      default: 'active',
-    },
     isDeleted: {
       type: Boolean,
       default: false,
@@ -187,34 +164,7 @@ studentSchema.virtual('fullName').get(function () {
   return `${this.name.firstName}  ${this.name.middleName} ${this.name.lastName}`;
 });
 
-// pre save middleware/hook : wikl work on create() save()
-
-studentSchema.pre('save', async function (next) {
-  // console.log(this, 'pre hook: we will save the data');
-  // eslint-disable-next-line @typescript-eslint/no-this-alias
-  const user = this; // current document
-  // hashing password amd save into DB
-
-  user.password = await bcrypt.hash(
-    user.password,
-    Number(config.bcrypt_salt_rounds),
-  );
-  next();
-});
-
-// post save middleware/hook
-
-studentSchema.post('save', function (doc, next) {
-  doc.password = '';
-  next();
-});
-
 // Query Middleware
-
-// studentSchema.pre('find', function (next) {
-//   this.find({ password: { $ne: true } });
-//   next();
-// });
 
 studentSchema.pre('find', function (next) {
   this.find({ isDeleted: { $ne: true } });
@@ -222,12 +172,9 @@ studentSchema.pre('find', function (next) {
 });
 
 studentSchema.pre('findOne', function (next) {
-  // this.select('-password');
   this.find({ isDeleted: { $ne: true } });
   next();
 });
-
-// [{$match: {isDeleted: {$ne: true}}} { '$match': { id: '1234567897' } } ]
 
 studentSchema.pre('aggregate', function (next) {
   this.pipeline().unshift({ $match: { isDeleted: { $ne: true } } });
@@ -243,11 +190,5 @@ studentSchema.statics.isUserExists = async function (id: string) {
   const existingUser = await Student.findOne({ id });
   return existingUser;
 };
-
-// creating a cutom instance method
-// studentSchema.methods.isUserExists = async function (id: string) {
-//   const existingUser = await Student.findOne({ id });
-//   return existingUser;
-// };
 
 export const Student = model<TStudent, StudentModel>('Student', studentSchema);
