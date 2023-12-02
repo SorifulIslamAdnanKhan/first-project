@@ -11,7 +11,7 @@ const globalErrorHandler = (
 ) => {
   const statusCode = 500;
   const message = err.message || 'Something went wrong!';
-
+  console.log(err);
   return res.status(statusCode).json({
     success: false,
     message,

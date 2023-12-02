@@ -10,14 +10,8 @@ const userNameValidationSchema = z.object({
       message:
         'First name must start with a capital letter and contain only letters',
     }),
-  middleName: z.string().optional(),
-  lastName: z
-    .string()
-    .min(1)
-    .trim()
-    .refine((value) => /^[a-zA-Z]+$/.test(value), {
-      message: 'Last name must contain only letters',
-    }),
+  middleName: z.string(),
+  lastName: z.string(),
 });
 
 const gurdianValidationSchema = z.object({
@@ -36,25 +30,29 @@ const localGurdianValidationSchema = z.object({
   address: z.string().min(1).trim(),
 });
 
-const studentValidationSchema = z.object({
-  id: z.string().min(1),
-  password: z.string().max(20),
-  name: userNameValidationSchema,
-  gender: z.enum(['male', 'female', 'other']),
-  dateOfBirth: z.string().optional(),
-  email: z.string().email(),
-  contactNo: z.string().min(1),
-  emergencyContactNo: z.string(),
-  bloodGroup: z
-    .enum(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'])
-    .optional(),
-  presentAddress: z.string().min(1).trim(),
-  permanentAddress: z.string().min(1).trim(),
-  gurdian: gurdianValidationSchema,
-  localGurdian: localGurdianValidationSchema,
-  profileImage: z.string().optional(),
-  isActive: z.enum(['active', 'blocked']).default('active'),
-  isDeleted: z.boolean(),
+export const createStudentValidationSchema = z.object({
+  body: z.object({
+    password: z.string().max(20),
+    student: z.object({
+      name: userNameValidationSchema,
+      gender: z.enum(['male', 'female', 'other']),
+      dateOfBirth: z.string().optional(),
+      email: z.string().email(),
+      contactNo: z.string().min(1),
+      emergencyContactNo: z.string(),
+      bloodGroup: z
+        .enum(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'])
+        .optional(),
+      presentAddress: z.string().min(1).trim(),
+      permanentAddress: z.string().min(1).trim(),
+      gurdian: gurdianValidationSchema,
+      localGurdian: localGurdianValidationSchema,
+      admissionSemester: z.string(),
+      profileImage: z.string().optional(),
+    }),
+  }),
 });
 
-export default studentValidationSchema;
+export const studentValidations = {
+  createStudentValidationSchema,
+};

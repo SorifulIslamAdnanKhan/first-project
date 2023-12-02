@@ -105,7 +105,7 @@ const studentSchema = new Schema<TStudent, StudentModel>(
       required: [true, 'Gender is required'],
     },
     dateOfBirth: {
-      type: String,
+      type: Date,
     },
     email: {
       type: String,
@@ -145,6 +145,10 @@ const studentSchema = new Schema<TStudent, StudentModel>(
     },
     profileImage: {
       type: String,
+    },
+    admissionSemester: {
+      type: Schema.Types.ObjectId,
+      ref: 'AcademicSemester',
     },
     isDeleted: {
       type: Boolean,
